@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++ Dojo</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #1e1e1e;
+    --accent: #ff4500;
+    --accent2: #ff8c00;
+    --green: #39ff14;
+    --dim: #444;
+    --text: #d4d4d4;
+    --muted: #666;
+    --xp-color: #ffd700;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(255,255,255,0.01) 24px, rgba(255,255,255,0.01) 25px),
+      repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(255,255,255,0.01) 24px, rgba(255,255,255,0.01) 25px);
+  }
+
+  header {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(255,69,0,0.4);
+  }
+
+  .logo span { color: var(--text); }
+
+  .hud {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .xp-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .level-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    color: var(--xp-color);
+    letter-spacing: 2px;
+  }
+
+  .xp-bar-wrap {
+    width: 120px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .xp-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--xp-color), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  .xp-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  .streak-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .streak-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .streak-label {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* Category pills */
+  .cats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: 720px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .cat-pill {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+    text-transform: uppercase;
+    background: var(--surface);
+  }
+
+  .cat-pill.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255,69,0,0.08);
+  }
+
+  /* Card */
+  .card {
+    width: 100%;
+    max-width: 720px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .drill-type {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .drill-type span {
+    color: var(--accent2);
+    font-weight: 700;
+  }
+
+  .q-counter {
+    font-size: 0.65rem;
+    color: var(--dim);
+  }
+
+  .card-body {
+    padding: 24px;
+  }
+
+  .question-text {
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  pre {
+    background: #0d0d0d;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 16px;
+    border-radius: 2px;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-bottom: 24px;
+    white-space: pre;
+  }
+
+  .kw { color: #569cd6; }
+  .type { color: #4ec9b0; }
+  .num { color: #b5cea8; }
+  .op { color: #d4d4d4; }
+  .comment { color: #608b4e; }
+  .fn { color: #dcdcaa; }
+  .str { color: #ce9178; }
+  .blank { 
+    color: var(--accent);
+    background: rgba(255,69,0,0.15);
+    padding: 1px 6px;
+    border-radius: 2px;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  /* Options */
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .opt-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.12s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(255,69,0,0.06);
+    color: var(--accent);
+  }
+
+  .opt-btn.correct {
+    border-color: var(--green);
+    background: rgba(57,255,20,0.08);
+    color: var(--green);
+  }
+
+  .opt-btn.wrong {
+    border-color: #ff3333;
+    background: rgba(255,51,51,0.08);
+    color: #ff3333;
+  }
+
+  .opt-btn:disabled { cursor: default; }
+
+  /* Free answer */
+  .free-input {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 12px;
+  }
+
+  .free-input:focus { border-color: var(--accent); }
+  .free-input.correct { border-color: var(--green); color: var(--green); }
+  .free-input.wrong { border-color: #ff3333; color: #ff3333; }
+
+  .submit-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 3px;
+    padding: 11px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .submit-btn:hover { background: #ff6030; }
+  .submit-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 3px;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: rgba(57,255,20,0.06);
+    border: 1px solid rgba(57,255,20,0.2);
+    color: #aaffaa;
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: rgba(255,51,51,0.06);
+    border: 1px solid rgba(255,51,51,0.2);
+    color: #ffaaaa;
+    display: block;
+  }
+
+  .feedback strong { color: #fff; }
+
+  /* XP popup */
+  .xp-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: var(--xp-color);
+    text-shadow: 0 0 30px rgba(255,215,0,0.6);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.1s;
+    z-index: 100;
+  }
+
+  .xp-popup.show {
+    animation: xpPop 0.8s forwards;
+  }
+
+  @keyframes xpPop {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    20% { opacity: 1; transform: translate(-50%, -60%) scale(1.1); }
+    60% { opacity: 1; transform: translate(-50%, -70%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -90%) scale(0.9); }
+  }
+
+  /* Next btn */
+  .next-btn {
+    display: none;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    padding: 11px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .next-btn:hover { background: rgba(255,69,0,0.1); }
+  .next-btn.visible { display: inline-block; }
+
+  /* Stats bar */
+  .stats-bar {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .stat-val.green { color: var(--green); }
+  .stat-val.red { color: #ff4444; }
+  .stat-val.gold { color: var(--xp-color); }
+
+  .stat-key {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .divider { width: 1px; background: var(--border); }
+
+  /* Slide transition */
+  .card-body {
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .category-tag {
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .category-tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">C<span>++</span> DOJO</div>
+  <div class="hud">
+    <div class="streak-display">
+      <div class="streak-num" id="streakNum">0</div>
+      <div class="streak-label">STREAK</div>
+    </div>
+    <div class="xp-display">
+      <div class="level-badge" id="levelBadge">LEVEL 1 — WHITE BELT</div>
+      <div class="xp-bar-wrap"><div class="xp-bar" id="xpBar" style="width:0%"></div></div>
+      <div class="xp-label" id="xpLabel">0 / 100 XP</div>
+    </div>
+  </div>
+</header>
+
+<div class="cats">
+  <div class="cat-pill active" data-cat="all">ALL</div>
+  <div class="cat-pill" data-cat="loop">LOOP BOUNDS</div>
+  <div class="cat-pill" data-cat="pointer">POINTERS</div>
+  <div class="cat-pill" data-cat="bits">BIT MANIP</div>
+  <div class="cat-pill" data-cat="tree">TREES / LISTS</div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="drill-type">DRILL TYPE: <span id="drillTypeLabel">—</span></div>
+    <div class="q-counter" id="qCounter">Q 1</div>
+  </div>
+  <div class="card-body" id="cardBody">
+    <!-- injected -->
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-val green" id="statCorrect">0</div><div class="stat-key">Correct</div></div>
+  <div class="divider"></div>
+  <div class="stat"><div class="stat-val red" id="statWrong">0</div><div class="stat-key">Wrong</div></div>
+  <div class="divider"></div>
+  <div class="stat"><div class="stat-val gold" id="statXP">0</div><div class="stat-key">Total XP</div></div>
+  <div class="divider"></div>
+  <div class="stat"><div class="stat-val" id="statAcc" style="color:var(--text)">—</div><div class="stat-key">Accuracy</div></div>
+  <div style="margin-left:auto;display:flex;align-items:center;">
+    <span id="syncStatus" style="font-size:0.65rem;letter-spacing:1px;color:var(--muted);"></span>
+  </div>
+</div>
+
+<div class="xp-popup" id="xpPopup">+XP</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const LEVELS = [
+  { name: "WHITE BELT",  xp: 0   },
+  { name: "YELLOW BELT", xp: 100 },
+  { name: "ORANGE BELT", xp: 250 },
+  { name: "GREEN BELT",  xp: 500 },
+  { name: "BLUE BELT",   xp: 900 },
+  { name: "BROWN BELT",  xp: 1500},
+  { name: "BLACK BELT",  xp: 2500},
+];
+
+const DRILLS = [
+  // ── LOOP BOUNDS ──────────────────────────────────────────────────────────
+  {
+    cat: "loop", type: "output",
+    question: "What does this print?",
+    code: `<span class="kw">int</span> n <span class="op">=</span> <span class="num">5</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>)
+    <span class="fn">printf</span>(<span class="str">"%d "</span>, i);`,
+    options: ["0 1 2 3 4", "0 1 2 3 4 5", "1 2 3 4 5", "0 1 2 3"],
+    answer: "0 1 2 3 4",
+    explain: "<strong>i < n</strong> stops BEFORE n. So last i printed is 4. Classic: n elements → indices 0..n-1."
+  },
+  {
+    cat: "loop", type: "output",
+    question: "What does this print?",
+    code: `<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">10</span>; i <span class="op">&gt;</span> <span class="num">0</span>; i <span class="op">-=</span> <span class="num">3</span>)
+    <span class="fn">printf</span>(<span class="str">"%d "</span>, i);`,
+    options: ["10 7 4 1", "10 7 4", "10 7 4 1 -2", "9 6 3"],
+    answer: "10 7 4 1",
+    explain: "i starts at 10, subtracts 3 each time: 10→7→4→1→-2. Loop stops when i<=0, so -2 is never printed. Last printed value is 1."
+  },
+  {
+    cat: "loop", type: "fill",
+    question: "Fill in blank: iterate from index 1 to last element inclusive.",
+    code: `<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">1</span>; i <span class="blank">???</span>; i<span class="op">++</span>)
+    <span class="fn">process</span>(arr[i]);`,
+    options: ["< n", "<= n", "<= n-1", "< n-1"],
+    answer: "<= n-1",
+    explain: "<strong>i <= n-1</strong> is identical to <strong>i < n</strong>. Both are correct. Knowing this equivalence lets you flip between forms when one reads more clearly. Last index is always n-1."
+  },
+  {
+    cat: "loop", type: "bug",
+    question: "Bug: find the maximum element in arr[].",
+    code: `<span class="kw">int</span> maxVal <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>)
+    <span class="kw">if</span> (arr[i] <span class="op">&gt;</span> maxVal) maxVal <span class="op">=</span> arr[i];`,
+    options: ["Loop bound should be i <= n", "maxVal init should be arr[0] or INT_MIN", "Should use >= not >", "No bug"],
+    answer: "maxVal init should be arr[0] or INT_MIN",
+    explain: "Initializing maxVal=0 fails for all-negative arrays (returns 0, not the actual max). Always init to <strong>arr[0]</strong> or <strong>INT_MIN</strong>. This is a classic initialization gotcha."
+  },
+  {
+    cat: "loop", type: "output",
+    question: "What prints? arr = {1,2,3,4,5}, n=5",
+    code: `<span class="kw">int</span> sum <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> n; i <span class="op">+=</span> <span class="num">2</span>)
+    sum <span class="op">+=</span> arr[i];
+<span class="fn">printf</span>(<span class="str">"%d"</span>, sum);`,
+    options: ["15", "9", "6", "10"],
+    answer: "9",
+    explain: "i=0,2,4 → arr[0]+arr[2]+arr[4] = 1+3+5 = 9. Stepping by 2 visits only even indices. Key skill: know which indices a step size hits."
+  },
+  {
+    cat: "loop", type: "fill",
+    question: "Fill in blank: do-while loop that reads input until user enters 0.",
+    code: `<span class="kw">int</span> x;
+<span class="kw">do</span> {
+    <span class="fn">scanf</span>(<span class="str">"%d"</span>, <span class="op">&</span>x);
+    <span class="fn">process</span>(x);
+} <span class="kw">while</span> (<span class="blank">???</span>);`,
+    options: ["x != 0", "x == 0", "x > 0", "!x"],
+    answer: "x != 0",
+    explain: "<strong>x != 0</strong> keeps the loop running while x is nonzero. do-while always executes body at least once — body runs before condition is checked. Good for input validation patterns."
+  },
+  {
+    cat: "loop", type: "bug",
+    question: "Spot the bug: sum all elements except the last.",
+    code: `<span class="kw">int</span> sum <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> n<span class="op">-</span><span class="num">1</span>; i<span class="op">++</span>)
+    sum <span class="op">+=</span> arr[i];`,
+    options: ["Should be i <= n-1", "n-1 underflows if n is unsigned 0", "Should skip index 0", "No bug"],
+    answer: "n-1 underflows if n is unsigned 0",
+    explain: "If n is <strong>size_t</strong> (unsigned) and equals 0, then n-1 wraps to a huge number → massive loop. Always check n>0 first, or use signed int for loop bounds. Classic unsigned underflow trap."
+  },
+  {
+    cat: "loop", type: "output",
+    question: "How many iterations does this loop run? (n = 8)",
+    code: `<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">1</span>; i <span class="op">&lt;</span> n; i <span class="op">*=</span> <span class="num">2</span>)
+    <span class="fn">doWork</span>(i);`,
+    options: ["3", "4", "8", "7"],
+    answer: "3",
+    explain: "i = 1, 2, 4 → stops at 8 (not < 8). That's 3 iterations. Multiplicative loops run O(log n) times. i=1,2,4,8... is doubling, hits log₂(8)=3 values before reaching n."
+  },
+  {
+    cat: "loop", type: "bug",
+    question: "Bug: count occurrences of target in arr[].",
+    code: `<span class="kw">int</span> count <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;=</span> n; i<span class="op">++</span>)
+    <span class="kw">if</span> (arr[i] <span class="op">==</span> target) count<span class="op">++</span>;`,
+    options: ["Should be count-- not count++", "i <= n reads arr[n] which is OOB", "Should initialize count to -1", "No bug"],
+    answer: "i <= n reads arr[n] which is OOB",
+    explain: "<strong>i <= n</strong> means i reaches n, accessing arr[n] which is one past the end — undefined behavior. Always use <strong>i < n</strong> for standard array iteration. This is the #1 off-by-one error."
+  },
+  {
+    cat: "loop", type: "output",
+    question: "What prints? (n=5)",
+    code: `<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>, j <span class="op">=</span> n<span class="op">-</span><span class="num">1</span>;
+<span class="kw">while</span> (i <span class="op">&lt;</span> j) { i<span class="op">++</span>; j<span class="op">--</span>; }
+<span class="fn">printf</span>(<span class="str">"%d %d"</span>, i, j);`,
+    options: ["2 2", "3 2", "2 3", "3 3"],
+    answer: "2 2",
+    explain: "i=0,j=4 → i=1,j=3 → i=2,j=2. Now i < j is false (2 < 2 is false). Prints 2 2. They meet in the middle for odd-length arrays."
+  },
+
+  // ── POINTERS / TWO-POINTER ───────────────────────────────────────────────
+  {
+    cat: "loop", type: "output",
+    question: "What does this print?",
+    code: `<span class="kw">int</span> n <span class="op">=</span> <span class="num">5</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;=</span> n; i<span class="op">++</span>)
+    <span class="fn">printf</span>(<span class="str">"%d "</span>, i);`,
+    options: ["0 1 2 3 4", "0 1 2 3 4 5", "1 2 3 4 5", "undefined behavior"],
+    answer: "0 1 2 3 4 5",
+    explain: "<strong>i <= n</strong> includes n itself. 6 iterations, not 5. This is the <= trap — adds one extra iteration."
+  },
+  {
+    cat: "loop", type: "fill",
+    question: "Fill in the blank so we iterate all adjacent pairs (i, i+1) without going OOB:",
+    code: `<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="blank">???</span> n<span class="op">-</span><span class="num">1</span>; i<span class="op">++</span>)
+    <span class="fn">process</span>(arr[i], arr[i<span class="op">+</span><span class="num">1</span>]);`,
+    options: ["<", "<=", "< n instead", "> 0"],
+    answer: "<",
+    explain: "<strong>i < n-1</strong> is equivalent to <strong>i <= n-2</strong>. Last valid pair is (n-2, n-1). Using <= here would access arr[n], which is OOB."
+  },
+  {
+    cat: "loop", type: "bug",
+    question: "Spot the bug: this is supposed to reverse arr[] in place.",
+    code: `<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>) {
+    <span class="fn">swap</span>(arr[i], arr[n<span class="op">-</span><span class="num">1</span><span class="op">-</span>i]);
+}`,
+    options: ["Loop should be i <= n", "Loop runs too many times — swaps back", "Should use i < n-1", "No bug"],
+    answer: "Loop runs too many times — swaps back",
+    explain: "When n=4: i=0 swaps 0↔3, i=1 swaps 1↔2, i=2 swaps 2↔1 (undoes it!), i=3 swaps 3↔0 (undoes it!). Fix: <strong>i < n/2</strong>."
+  },
+  {
+    cat: "loop", type: "output",
+    question: "n = 4. How many times does the inner loop body execute?",
+    code: `<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>)
+    <span class="kw">for</span> (<span class="kw">int</span> j <span class="op">=</span> i<span class="op">+</span><span class="num">1</span>; j <span class="op">&lt;</span> n; j<span class="op">++</span>)
+        <span class="fn">process</span>(i, j);`,
+    options: ["16", "12", "6", "8"],
+    answer: "6",
+    explain: "This generates all pairs (i,j) where i < j. Count: (0,1),(0,2),(0,3),(1,2),(1,3),(2,3) = 6. Formula: n*(n-1)/2 = 4*3/2 = 6."
+  },
+
+  // ── POINTERS / TWO-POINTER ───────────────────────────────────────────────
+  {
+    cat: "pointer", type: "output",
+    question: "What does this print? (n = 5)",
+    code: `<span class="kw">int</span> lo <span class="op">=</span> <span class="num">0</span>, hi <span class="op">=</span> n<span class="op">-</span><span class="num">1</span>;
+<span class="kw">while</span> (lo <span class="op">&lt;</span> hi) {
+    <span class="fn">printf</span>(<span class="str">"[%d,%d] "</span>, lo, hi);
+    lo<span class="op">++</span>; hi<span class="op">--</span>;
+}`,
+    options: ["[0,4] [1,3] [2,2]", "[0,4] [1,3]", "[0,4] [1,3] [2,3]", "[0,4] [1,3] [2,2] [3,1]"],
+    answer: "[0,4] [1,3]",
+    explain: "lo < hi (strict), so loop stops when lo==hi (the middle). Prints [0,4] then [1,3]. When lo would become 2 and hi 2, lo < hi is false. Middle element untouched."
+  },
+  {
+    cat: "pointer", type: "bug",
+    question: "Spot the bug in this two-pointer sum search:",
+    code: `<span class="kw">int</span> lo <span class="op">=</span> <span class="num">0</span>, hi <span class="op">=</span> n<span class="op">-</span><span class="num">1</span>;
+<span class="kw">while</span> (lo <span class="op">&lt;=</span> hi) {
+    <span class="kw">int</span> sum <span class="op">=</span> arr[lo] <span class="op">+</span> arr[hi];
+    <span class="kw">if</span> (sum <span class="op">==</span> target) <span class="kw">return</span> <span class="kw">true</span>;
+    <span class="kw">if</span> (sum <span class="op">&lt;</span> target) lo<span class="op">++</span>;
+    <span class="kw">else</span> hi<span class="op">--</span>;
+}`,
+    options: ["Should be lo < hi, not lo <= hi", "Should check sum > target", "arr indices wrong", "No bug"],
+    answer: "Should be lo < hi, not lo <= hi",
+    explain: "When lo==hi, arr[lo]+arr[hi] = 2*arr[lo]. You're pairing an element with itself, which is wrong for a two-sum problem. Use <strong>lo < hi</strong> to avoid self-pairing."
+  },
+  {
+    cat: "pointer", type: "fill",
+    question: "Fill in the blank: reverse a string in place using two pointers.",
+    code: `<span class="kw">int</span> lo <span class="op">=</span> <span class="num">0</span>, hi <span class="op">=</span> <span class="fn">strlen</span>(s) <span class="op">-</span> <span class="num">1</span>;
+<span class="kw">while</span> (<span class="blank">???</span>) {
+    <span class="fn">swap</span>(s[lo<span class="op">++</span>], s[hi<span class="op">--</span>]);
+}`,
+    options: ["lo < hi", "lo <= hi", "lo != hi", "hi > 0"],
+    answer: "lo < hi",
+    explain: "<strong>lo < hi</strong> is correct. When they cross or meet, we're done. lo <= hi would swap the middle character with itself (harmless but unnecessary) and risk crossing."
+  },
+  {
+    cat: "pointer", type: "output",
+    question: "After this runs, what is *p?",
+    code: `<span class="kw">int</span> arr[] <span class="op">=</span> {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>};
+<span class="kw">int</span> <span class="op">*</span>p <span class="op">=</span> arr;
+p<span class="op">++</span>;
+p<span class="op">++</span>;
+<span class="fn">printf</span>(<span class="str">"%d"</span>, <span class="op">*</span>p);`,
+    options: ["10", "20", "30", "40"],
+    answer: "30",
+    explain: "p starts at arr[0]=10. Each p++ advances by sizeof(int) bytes. After 2 increments, p points to arr[2]=30."
+  },
+  {
+    cat: "pointer", type: "bug",
+    question: "What's wrong with this sliding window?",
+    code: `<span class="kw">int</span> left <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> right <span class="op">=</span> <span class="num">0</span>; right <span class="op">&lt;</span> n; right<span class="op">++</span>) {
+    window<span class="fn">.add</span>(arr[right]);
+    <span class="kw">if</span> (window<span class="fn">.size</span>() <span class="op">&gt;</span> k) {
+        window<span class="fn">.remove</span>(arr[left]);
+        left<span class="op">++</span>;
+    }
+}`,
+    options: ["left should start at 1", "Should be right <= n", "Window size check should be >= k", "No bug — this is correct"],
+    answer: "No bug — this is correct",
+    explain: "This is the standard fixed-size sliding window pattern. left=0, right expands, when window exceeds k we shrink from left. Both boundaries are correct. Recognize this shape!"
+  },
+  {
+    cat: "pointer", type: "output",
+    question: "What does p-q print?",
+    code: `<span class="kw">int</span> arr[] <span class="op">=</span> {<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>};
+<span class="kw">int</span> <span class="op">*</span>p <span class="op">=</span> arr <span class="op">+</span> <span class="num">4</span>;
+<span class="kw">int</span> <span class="op">*</span>q <span class="op">=</span> arr <span class="op">+</span> <span class="num">1</span>;
+<span class="fn">printf</span>(<span class="str">"%d"</span>, p <span class="op">-</span> q);`,
+    options: ["3", "4", "12", "1"],
+    answer: "3",
+    explain: "Pointer subtraction returns the number of elements between them, not bytes. p points to arr[4], q to arr[1]. Distance = 4-1 = 3 elements. This is how you compute indices from pointers."
+  },
+  {
+    cat: "pointer", type: "fill",
+    question: "Fill in: binary search — which mid calculation avoids integer overflow?",
+    code: `<span class="kw">int</span> lo <span class="op">=</span> <span class="num">0</span>, hi <span class="op">=</span> n<span class="op">-</span><span class="num">1</span>;
+<span class="kw">while</span> (lo <span class="op">&lt;=</span> hi) {
+    <span class="kw">int</span> mid <span class="op">=</span> <span class="blank">???</span>;
+    <span class="kw">if</span> (arr[mid] <span class="op">==</span> target) <span class="kw">return</span> mid;
+    <span class="kw">if</span> (arr[mid] <span class="op">&lt;</span> target) lo <span class="op">=</span> mid <span class="op">+</span> <span class="num">1</span>;
+    <span class="kw">else</span> hi <span class="op">=</span> mid <span class="op">-</span> <span class="num">1</span>;
+}`,
+    options: ["lo + hi / 2", "lo + (hi - lo) / 2", "(lo + hi) / 2", "(hi - lo) / 2"],
+    answer: "lo + (hi - lo) / 2",
+    explain: "<strong>(lo+hi)/2</strong> overflows when lo+hi > INT_MAX. <strong>lo + (hi-lo)/2</strong> is safe because hi-lo is always non-negative and smaller. Memorize this form — it's expected in interviews."
+  },
+  {
+    cat: "pointer", type: "bug",
+    question: "Bug: expand window while sum < target, then record length.",
+    code: `<span class="kw">int</span> left <span class="op">=</span> <span class="num">0</span>, sum <span class="op">=</span> <span class="num">0</span>, best <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> r <span class="op">=</span> <span class="num">0</span>; r <span class="op">&lt;</span> n; r<span class="op">++</span>) {
+    sum <span class="op">+=</span> arr[r];
+    <span class="kw">while</span> (sum <span class="op">&gt;=</span> target)
+        sum <span class="op">-=</span> arr[left<span class="op">++</span>];
+    best <span class="op">=</span> <span class="fn">max</span>(best, r <span class="op">-</span> left <span class="op">+</span> <span class="num">1</span>);
+}`,
+    options: ["best should use min not max", "left++ should be ++left", "r - left + 1 is wrong", "No bug"],
+    answer: "No bug",
+    explain: "This is the variable-size sliding window correctly structured. Expand right, shrink left while constraint violated, record window size as r-left+1. The +1 is correct because r and left are both inclusive indices."
+  },
+  {
+    cat: "pointer", type: "output",
+    question: "What does this print?",
+    code: `<span class="kw">int</span> x <span class="op">=</span> <span class="num">42</span>;
+<span class="kw">int</span> <span class="op">*</span>p <span class="op">=</span> <span class="op">&</span>x;
+<span class="op">*</span>p <span class="op">=</span> <span class="num">99</span>;
+<span class="fn">printf</span>(<span class="str">"%d"</span>, x);`,
+    options: ["42", "99", "0", "undefined"],
+    answer: "99",
+    explain: "*p = 99 writes through the pointer to x's memory location. x and *p refer to the same storage. After the write, x == 99. This is the fundamental 'write through pointer' operation."
+  },
+  {
+    cat: "pointer", type: "fill",
+    question: "Fill in: fast/slow pointer to find middle of linked list.",
+    code: `Node <span class="op">*</span>slow <span class="op">=</span> head, <span class="op">*</span>fast <span class="op">=</span> head;
+<span class="kw">while</span> (fast <span class="op">&&</span> <span class="blank">???</span>) {
+    slow <span class="op">=</span> slow<span class="op">-></span>next;
+    fast <span class="op">=</span> fast<span class="op">-></span>next<span class="op">-></span>next;
+}
+<span class="comment">// slow is now at middle</span>`,
+    options: ["fast->next", "fast->next->next", "slow->next", "fast != slow"],
+    answer: "fast->next",
+    explain: "<strong>fast && fast->next</strong> — you must check fast->next before accessing fast->next->next or you'll null-deref. When fast reaches end (null or last node), slow is at the middle. Classic pattern."
+  },
+  {
+    cat: "pointer", type: "bug",
+    question: "Bug: remove duplicates from sorted array in-place.",
+    code: `<span class="kw">int</span> k <span class="op">=</span> <span class="num">1</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">1</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>) {
+    <span class="kw">if</span> (arr[i] <span class="op">!=</span> arr[i<span class="op">-</span><span class="num">1</span>])
+        arr[k<span class="op">++</span>] <span class="op">=</span> arr[i];
+}
+<span class="kw">return</span> k;`,
+    options: ["k should start at 0", "Should compare arr[i] to arr[k-1]", "i should start at 0", "No bug"],
+    answer: "No bug",
+    explain: "This is the correct in-place dedup pattern. k=1 because first element is always unique. Compare arr[i] to arr[i-1] (previous element in original) — equivalent to arr[k-1] here since array is sorted. Returns new length."
+  },
+
+  // ── BIT MANIPULATION ────────────────────────────────────────────────────
+
+  // ── BIT MANIPULATION ────────────────────────────────────────────────────
+  {
+    cat: "bits", type: "output",
+    question: "What does this print?",
+    code: `<span class="kw">int</span> x <span class="op">=</span> <span class="num">6</span>;  <span class="comment">// 0110</span>
+<span class="fn">printf</span>(<span class="str">"%d"</span>, x <span class="op">&</span> (x<span class="op">-</span><span class="num">1</span>));`,
+    options: ["0", "4", "6", "2"],
+    answer: "4",
+    explain: "x-1 = 5 = 0101. x & (x-1) = 0110 & 0101 = 0100 = 4. This trick clears the lowest set bit. If result==0, x is a power of 2."
+  },
+  {
+    cat: "bits", type: "output",
+    question: "What is the output?",
+    code: `<span class="kw">int</span> a <span class="op">=</span> <span class="num">5</span>, b <span class="op">=</span> <span class="num">9</span>;
+a <span class="op">^=</span> b;
+b <span class="op">^=</span> a;
+a <span class="op">^=</span> b;
+<span class="fn">printf</span>(<span class="str">"%d %d"</span>, a, b);`,
+    options: ["5 9", "9 5", "0 0", "14 14"],
+    answer: "9 5",
+    explain: "XOR swap. a^=b makes a=a^b. b^=a makes b=b^(a^b)=a (original). a^=b makes a=(a^b)^a=b (original). Values are swapped. Note: breaks if a and b are the same variable/address."
+  },
+  {
+    cat: "bits", type: "fill",
+    question: "Fill in blank: check if bit k is set in x.",
+    code: `<span class="kw">bool</span> isSet <span class="op">=</span> (x <span class="op">&</span> (<span class="blank">???</span>)) <span class="op">!=</span> <span class="num">0</span>;`,
+    options: ["1 << k", "k << 1", "x >> k", "~k"],
+    answer: "1 << k",
+    explain: "<strong>1 << k</strong> creates a mask with only bit k set. ANDing with x isolates that bit. If nonzero, bit k is set. This is the fundamental bit-check pattern — memorize it."
+  },
+  {
+    cat: "bits", type: "output",
+    question: "What prints?",
+    code: `<span class="kw">int</span> x <span class="op">=</span> <span class="num">12</span>; <span class="comment">// 1100</span>
+<span class="fn">printf</span>(<span class="str">"%d"</span>, x <span class="op">>></span> <span class="num">2</span>);`,
+    options: ["3", "6", "48", "0"],
+    answer: "3",
+    explain: "Right shift by 2: 1100 >> 2 = 0011 = 3. Right shift divides by 2^n (for non-negative ints). Left shift multiplies. Critical: right shift of negative signed ints is implementation-defined."
+  },
+  {
+    cat: "bits", type: "bug",
+    question: "Bug: count set bits in x.",
+    code: `<span class="kw">int</span> count <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">while</span> (x) {
+    count <span class="op">+=</span> x <span class="op">&</span> <span class="num">1</span>;
+    x <span class="op">>>=</span> <span class="num">1</span>;
+}`,
+    options: ["Should be x >>= 2", "Should be count += x & 0xFF", "x >>= 1 should be x /= 2", "No bug"],
+    answer: "No bug",
+    explain: "This is correct. x & 1 checks the LSB. x >>= 1 shifts right. Loop ends when x==0. This is the standard O(log n) popcount loop. The faster trick: x &= (x-1) counts only set bits."
+  },
+  {
+    cat: "bits", type: "output",
+    question: "What is 5 ^ 5?",
+    code: `<span class="fn">printf</span>(<span class="str">"%d"</span>, <span class="num">5</span> <span class="op">^</span> <span class="num">5</span>);`,
+    options: ["0", "5", "10", "25"],
+    answer: "0",
+    explain: "Any value XOR itself = 0. Any value XOR 0 = itself. This is why XOR finds the single non-duplicate in an array — duplicates cancel out to 0."
+  },
+  {
+    cat: "bits", type: "fill",
+    question: "Fill in: set bit k in x.",
+    code: `x <span class="op">=</span> x <span class="op">|</span> (<span class="blank">???</span>);`,
+    options: ["1 << k", "~(1 << k)", "x >> k", "k | 1"],
+    answer: "1 << k",
+    explain: "OR with a mask that has only bit k set. This forces bit k to 1 without affecting other bits. Complement: to CLEAR bit k use x & ~(1 << k). To TOGGLE bit k use x ^ (1 << k)."
+  },
+  {
+    cat: "bits", type: "output",
+    question: "x = 0b1010 (10). What does x & -x print?",
+    code: `<span class="kw">int</span> x <span class="op">=</span> <span class="num">10</span>; <span class="comment">// 1010</span>
+<span class="fn">printf</span>(<span class="str">"%d"</span>, x <span class="op">&</span> <span class="op">-</span>x);`,
+    options: ["2", "10", "8", "0"],
+    answer: "2",
+    explain: "-x in two's complement flips all bits and adds 1. -10 = 0110. x & -x = 1010 & 0110 = 0010 = 2. This isolates the lowest set bit. Used in Fenwick trees and bit tricks everywhere."
+  },
+  {
+    cat: "bits", type: "bug",
+    question: "Bug: check if x is a power of 2.",
+    code: `<span class="kw">bool</span> isPow2 <span class="op">=</span> (x <span class="op">&</span> (x<span class="op">-</span><span class="num">1</span>)) <span class="op">==</span> <span class="num">0</span>;`,
+    options: ["Should use | not &", "Fails for x=0 (0 is not a power of 2)", "Should be x & (x+1)", "No bug"],
+    answer: "Fails for x=0 (0 is not a power of 2)",
+    explain: "0 & (0-1) = 0 & 0xFFFFFFFF = 0, so it incorrectly returns true for x=0. Fix: <strong>x > 0 && (x & (x-1)) == 0</strong>. Always remember the edge case."
+  },
+  {
+    cat: "bits", type: "output",
+    question: "What does this print? arr={2,3,2,4,4}",
+    code: `<span class="kw">int</span> result <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> x : arr) result <span class="op">^=</span> x;
+<span class="fn">printf</span>(<span class="str">"%d"</span>, result);`,
+    options: ["3", "2", "4", "0"],
+    answer: "3",
+    explain: "XOR cancels duplicates: 2^2=0, 4^4=0. Only 3 remains. result = 0^2^3^2^4^4 = 3. This is the classic 'find the single non-duplicate' XOR trick — O(n) time, O(1) space."
+  },
+  {
+    cat: "bits", type: "fill",
+    question: "Fill in: count trailing zeros in x (lowest set bit position).",
+    code: `<span class="kw">int</span> tz <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">while</span> (<span class="blank">???</span>) { x <span class="op">>>=</span> <span class="num">1</span>; tz<span class="op">++</span>; }`,
+    options: ["!(x & 1)", "x & 1", "x > 0", "x >> 1"],
+    answer: "!(x & 1)",
+    explain: "<strong>!(x & 1)</strong> is true while the lowest bit is 0 (i.e., trailing zero). Keep shifting right and counting until LSB is 1. Equivalent to: __builtin_ctz(x) in GCC."
+  },
+  {
+    cat: "bits", type: "output",
+    question: "What prints? (assume 32-bit int)",
+    code: `<span class="kw">int</span> x <span class="op">=</span> <span class="num">1</span>;
+<span class="fn">printf</span>(<span class="str">"%d"</span>, x <span class="op">&lt;&lt;</span> <span class="num">31</span>);`,
+    options: ["2147483648", "-2147483648", "0", "undefined behavior"],
+    answer: "undefined behavior",
+    explain: "Left-shifting a 1 into the sign bit of a signed int is <strong>undefined behavior</strong> in C++. Use <strong>1u << 31</strong> (unsigned) or <strong>1LL << 31</strong> instead. This is a real bug lurking in production code."
+  },
+
+  // ── TREES / LINKED LISTS ─────────────────────────────────────────────────
+
+  // ── TREES / LINKED LISTS ─────────────────────────────────────────────────
+  {
+    cat: "tree", type: "output",
+    question: "What traversal order does this produce?",
+    code: `<span class="kw">void</span> <span class="fn">traverse</span>(Node<span class="op">*</span> n) {
+    <span class="kw">if</span> (<span class="op">!</span>n) <span class="kw">return</span>;
+    <span class="fn">traverse</span>(n<span class="op">-></span>left);
+    <span class="fn">visit</span>(n);
+    <span class="fn">traverse</span>(n<span class="op">-></span>right);
+}`,
+    options: ["Pre-order", "In-order", "Post-order", "Level-order"],
+    answer: "In-order",
+    explain: "Left → Node → Right = <strong>in-order</strong>. For a BST this yields sorted order. Pre-order: Node→L→R. Post-order: L→R→Node. Commit this to muscle memory."
+  },
+  {
+    cat: "tree", type: "bug",
+    question: "Spot the bug in this linked list node deletion:",
+    code: `<span class="kw">void</span> <span class="fn">deleteNext</span>(Node<span class="op">*</span> prev) {
+    Node<span class="op">*</span> toDelete <span class="op">=</span> prev<span class="op">-></span>next;
+    prev<span class="op">-></span>next <span class="op">=</span> prev<span class="op">-></span>next<span class="op">-></span>next;
+    <span class="kw">delete</span> toDelete;
+}`,
+    options: ["Should free before relinking", "prev->next->next could be null — crash", "toDelete not set correctly", "No bug"],
+    answer: "No bug",
+    explain: "This is correct. Save the node to delete, relink around it, then free it. Freeing before relinking would lose the next pointer. Order matters: save → relink → free."
+  },
+  {
+    cat: "tree", type: "fill",
+    question: "Fill in blank: reverse a singly linked list iteratively.",
+    code: `Node<span class="op">*</span> prev <span class="op">=</span> <span class="kw">nullptr</span>;
+Node<span class="op">*</span> curr <span class="op">=</span> head;
+<span class="kw">while</span> (curr) {
+    Node<span class="op">*</span> nxt <span class="op">=</span> curr<span class="op">-></span>next;
+    curr<span class="op">-></span>next <span class="op">=</span> <span class="blank">???</span>;
+    prev <span class="op">=</span> curr;
+    curr <span class="op">=</span> nxt;
+}`,
+    options: ["prev", "nxt", "nullptr", "curr"],
+    answer: "prev",
+    explain: "curr->next = prev reverses the pointer. Then advance prev=curr, curr=nxt. This is THE linked list reversal pattern. Three pointers: prev, curr, nxt. Burn it in."
+  },
+  {
+    cat: "tree", type: "output",
+    question: "Tree: root=1, root->left=2, root->right=3. What does post-order print?",
+    code: `<span class="kw">void</span> <span class="fn">post</span>(Node<span class="op">*</span> n) {
+    <span class="kw">if</span> (<span class="op">!</span>n) <span class="kw">return</span>;
+    <span class="fn">post</span>(n<span class="op">-></span>left);
+    <span class="fn">post</span>(n<span class="op">-></span>right);
+    <span class="fn">printf</span>(<span class="str">"%d "</span>, n<span class="op">-></span>val);
+}`,
+    options: ["1 2 3", "2 3 1", "2 1 3", "3 2 1"],
+    answer: "2 3 1",
+    explain: "Post-order: left subtree → right subtree → root. So: visit 2 (leaf), visit 3 (leaf), visit 1 (root) = <strong>2 3 1</strong>. Post-order is used when children must be processed before parent (e.g., deleting a tree)."
+  },
+  {
+    cat: "tree", type: "bug",
+    question: "Bug: detect if a linked list has a cycle (Floyd's).",
+    code: `Node<span class="op">*</span> slow <span class="op">=</span> head, <span class="op">*</span>fast <span class="op">=</span> head;
+<span class="kw">while</span> (fast <span class="op">&&</span> fast<span class="op">-></span>next) {
+    slow <span class="op">=</span> slow<span class="op">-></span>next;
+    fast <span class="op">=</span> fast<span class="op">-></span>next<span class="op">-></span>next;
+    <span class="kw">if</span> (slow <span class="op">==</span> fast) <span class="kw">return</span> <span class="kw">true</span>;
+}
+<span class="kw">return</span> <span class="kw">false</span>;`,
+    options: ["slow should move 2 steps", "Check slow==fast before moving", "fast->next->next is unsafe", "No bug"],
+    answer: "No bug",
+    explain: "This is correct Floyd's cycle detection. Check fast && fast->next before accessing fast->next->next prevents null deref. slow moves 1 step, fast moves 2. If cycle exists they'll meet."
+  },
+  {
+    cat: "tree", type: "fill",
+    question: "Fill in: the universal base case for tree recursion.",
+    code: `<span class="kw">int</span> <span class="fn">height</span>(Node<span class="op">*</span> n) {
+    <span class="kw">if</span> (<span class="blank">???</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">return</span> <span class="num">1</span> <span class="op">+</span> <span class="fn">max</span>(<span class="fn">height</span>(n<span class="op">-></span>left),
+                    <span class="fn">height</span>(n<span class="op">-></span>right));
+}`,
+    options: ["n->left == nullptr", "!n", "n->right == nullptr", "n == root"],
+    answer: "!n",
+    explain: "<strong>if (!n) return 0</strong> is the universal tree base case. Null node = height 0. This handles empty trees AND leaf node children automatically. Always check !n first in tree recursion."
+  },
+  {
+    cat: "tree", type: "output",
+    question: "What order does pre-order traversal visit nodes?",
+    code: `<span class="kw">void</span> <span class="fn">pre</span>(Node<span class="op">*</span> n) {
+    <span class="kw">if</span> (<span class="op">!</span>n) <span class="kw">return</span>;
+    <span class="fn">visit</span>(n);        <span class="comment">// ← here</span>
+    <span class="fn">pre</span>(n<span class="op">-></span>left);
+    <span class="fn">pre</span>(n<span class="op">-></span>right);
+}`,
+    options: ["Left, Root, Right", "Root, Left, Right", "Left, Right, Root", "Right, Left, Root"],
+    answer: "Root, Left, Right",
+    explain: "Pre-order visits the node FIRST, then recurses left, then right. Root → Left → Right. Used for copying trees, serialization, prefix expressions. Visit happens at entry, not return."
+  },
+  {
+    cat: "tree", type: "bug",
+    question: "Bug: insert into a BST.",
+    code: `Node<span class="op">*</span> <span class="fn">insert</span>(Node<span class="op">*</span> root, <span class="kw">int</span> val) {
+    <span class="kw">if</span> (<span class="op">!</span>root) <span class="kw">return</span> <span class="kw">new</span> Node(val);
+    <span class="kw">if</span> (val <span class="op">&lt;</span> root<span class="op">-></span>val)
+        root<span class="op">-></span>left <span class="op">=</span> <span class="fn">insert</span>(root<span class="op">-></span>left, val);
+    <span class="kw">else</span>
+        root<span class="op">-></span>right <span class="op">=</span> <span class="fn">insert</span>(root<span class="op">-></span>right, val);
+    <span class="kw">return</span> root;
+}`,
+    options: ["Should check val > root->val for right", "Missing return root at end", "New node should set left/right to null", "No bug"],
+    answer: "No bug",
+    explain: "This is correct recursive BST insertion. Base case: null node → create new. Recurse left if smaller, right if >=. Return root at each level to reattach children. Classic pattern."
+  },
+  {
+    cat: "tree", type: "output",
+    question: "List has nodes: 1→2→3→NULL. After reversal, what does head->next->val equal?",
+    code: `<span class="comment">// Standard iterative reversal applied</span>
+<span class="comment">// Original: 1 → 2 → 3 → NULL</span>
+<span class="comment">// After reversal: 3 → 2 → 1 → NULL</span>
+<span class="fn">printf</span>(<span class="str">"%d"</span>, head<span class="op">-></span>next<span class="op">-></span>val);`,
+    options: ["1", "2", "3", "NULL crash"],
+    answer: "2",
+    explain: "After reversal, head points to 3 (old tail). head->next is 2. head->next->next is 1. head->next->next->next is NULL. New order: 3→2→1→NULL."
+  },
+  {
+    cat: "tree", type: "fill",
+    question: "Fill in: BFS level-order traversal using a queue.",
+    code: `queue<span class="op">&lt;</span>Node<span class="op">*&gt;</span> q;
+q<span class="fn">.push</span>(root);
+<span class="kw">while</span> (<span class="op">!</span>q<span class="fn">.empty</span>()) {
+    Node<span class="op">*</span> n <span class="op">=</span> <span class="blank">???</span>;
+    q<span class="fn">.pop</span>();
+    <span class="fn">visit</span>(n);
+    <span class="kw">if</span> (n<span class="op">-></span>left)  q<span class="fn">.push</span>(n<span class="op">-></span>left);
+    <span class="kw">if</span> (n<span class="op">-></span>right) q<span class="fn">.push</span>(n<span class="op">-></span>right);
+}`,
+    options: ["q.front()", "q.back()", "q.top()", "q.begin()"],
+    answer: "q.front()",
+    explain: "<strong>q.front()</strong> peeks the front of the queue (FIFO). Then q.pop() removes it. This is the BFS pattern: enqueue root, then for each node process it and enqueue its children. front()+pop() is the std::queue dequeue idiom."
+  },
+  {
+    cat: "tree", type: "bug",
+    question: "Bug: find if value exists in BST.",
+    code: `<span class="kw">bool</span> <span class="fn">search</span>(Node<span class="op">*</span> root, <span class="kw">int</span> val) {
+    <span class="kw">if</span> (<span class="op">!</span>root) <span class="kw">return</span> <span class="kw">false</span>;
+    <span class="kw">if</span> (root<span class="op">-></span>val <span class="op">==</span> val) <span class="kw">return</span> <span class="kw">true</span>;
+    <span class="kw">return</span> <span class="fn">search</span>(root<span class="op">-></span>left, val) <span class="op">||</span>
+           <span class="fn">search</span>(root<span class="op">-></span>right, val);
+}`,
+    options: ["Should use && not ||", "Ignores BST property — searches both subtrees", "Base case wrong", "No bug"],
+    answer: "Ignores BST property — searches both subtrees",
+    explain: "This works but is O(n) — it ignores the BST invariant. Should be: if val < root->val return search(left), else return search(right). Proper BST search is O(log n). Big interview signal."
+  },
+  {
+    cat: "tree", type: "output",
+    question: "What's the time complexity of this? (balanced BST, n nodes)",
+    code: `<span class="kw">int</span> <span class="fn">height</span>(Node<span class="op">*</span> n) {
+    <span class="kw">if</span> (<span class="op">!</span>n) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">return</span> <span class="num">1</span> <span class="op">+</span> <span class="fn">max</span>(<span class="fn">height</span>(n<span class="op">-></span>left),
+                    <span class="fn">height</span>(n<span class="op">-></span>right));
+}`,
+    options: ["O(log n)", "O(n log n)", "O(n)", "O(h) where h is height"],
+    answer: "O(n)",
+    explain: "Every node is visited exactly once regardless of tree shape. O(n) total. The fact that it's balanced means height is O(log n), but we still touch all n nodes. Space is O(h) = O(log n) for the call stack."
+  },
+];
+
+// ─── FIREBASE CONFIG ─────────────────────────────────────────────────────────
+// Paste your Firebase config here after creating a project at firebase.google.com
+// Project Settings → General → Your apps → SDK setup → Config
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyANhV297IP7G5nueArVBQaPGihuv_lLehA",
+  authDomain:        "cpp-dojo.firebaseapp.com",
+  projectId:         "cpp-dojo",
+  storageBucket:     "cpp-dojo.firebasestorage.app",
+  messagingSenderId: "830371433553",
+  appId:             "1:830371433553:web:c837886c3c34e7dba0fc70",
+};
+// Change this to your name/handle — this is your save slot ID
+const PLAYER_ID = "gregory";
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+
+let db = null;
+let firebaseReady = false;
+
+let state = {
+  xp: 0,
+  streak: 0,
+  correct: 0,
+  wrong: 0,
+  currentCat: "all",
+  qIndex: 0,
+  answered: false,
+  queue: [],
+  totalQ: 0,
+};
+
+function getQueue(cat) {
+  let pool = cat === "all" ? DRILLS : DRILLS.filter(d => d.cat === cat);
+  // shuffle
+  return [...pool].sort(() => Math.random() - 0.5);
+}
+
+function levelInfo() {
+  let level = 0;
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (state.xp >= LEVELS[i].xp) { level = i; break; }
+  }
+  const nextXp = level < LEVELS.length - 1 ? LEVELS[level + 1].xp : LEVELS[level].xp + 500;
+  const prevXp = LEVELS[level].xp;
+  const pct = Math.min(100, ((state.xp - prevXp) / (nextXp - prevXp)) * 100);
+  return { level: level + 1, name: LEVELS[level].name, pct, nextXp, prevXp };
+}
+
+function updateHUD() {
+  const li = levelInfo();
+  document.getElementById("levelBadge").textContent = `LEVEL ${li.level} — ${li.name}`;
+  document.getElementById("xpBar").style.width = li.pct + "%";
+  document.getElementById("xpLabel").textContent = `${state.xp} / ${li.nextXp} XP`;
+  document.getElementById("streakNum").textContent = state.streak;
+  document.getElementById("statCorrect").textContent = state.correct;
+  document.getElementById("statWrong").textContent = state.wrong;
+  document.getElementById("statXP").textContent = state.xp;
+  const total = state.correct + state.wrong;
+  document.getElementById("statAcc").textContent = total ? Math.round(state.correct / total * 100) + "%" : "—";
+}
+
+function popXP(amount) {
+  const el = document.getElementById("xpPopup");
+  el.textContent = `+${amount} XP`;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+const TYPE_LABELS = { output: "WHAT DOES IT PRINT?", fill: "FILL IN THE BLANK", bug: "SPOT THE BUG" };
+const CAT_LABELS = { loop: "LOOP BOUNDS", pointer: "POINTERS / TWO-POINTER", bits: "BIT MANIPULATION", tree: "TREES / LINKED LISTS" };
+
+function renderDrill() {
+  if (state.qIndex >= state.queue.length) {
+    state.queue = getQueue(state.currentCat);
+    state.qIndex = 0;
+  }
+  const drill = state.queue[state.qIndex];
+  state.answered = false;
+  state.totalQ++;
+
+  document.getElementById("drillTypeLabel").textContent = TYPE_LABELS[drill.type] || drill.type;
+  document.getElementById("qCounter").textContent = `Q ${state.totalQ}`;
+
+  const body = document.getElementById("cardBody");
+  body.style.animation = "none";
+  void body.offsetWidth;
+  body.style.animation = "";
+
+  let html = `<div class="category-tag">${CAT_LABELS[drill.cat] || drill.cat}</div>`;
+  html += `<div class="question-text">${drill.question}</div>`;
+  if (drill.code) html += `<pre>${drill.code}</pre>`;
+
+  if (drill.options) {
+    html += `<div class="options">`;
+    drill.options.forEach(opt => {
+      html += `<button class="opt-btn" onclick="checkAnswer(this, '${opt.replace(/'/g, "\\'")}', '${drill.answer.replace(/'/g, "\\'")}', \`${drill.explain.replace(/`/g, "\\`")}\`)">${opt}</button>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="feedback" id="feedback"></div>`;
+  html += `<button class="next-btn" id="nextBtn" onclick="nextDrill()">NEXT DRILL →</button>`;
+
+  body.innerHTML = html;
+  updateHUD();
+}
+
+function checkAnswer(btn, chosen, correct, explain) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const allBtns = document.querySelectorAll(".opt-btn");
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add("correct");
+  });
+
+  const fb = document.getElementById("feedback");
+  const nextBtn = document.getElementById("nextBtn");
+
+  if (chosen === correct) {
+    btn.classList.add("correct");
+    state.correct++;
+    state.streak++;
+    const xpGain = 10 + Math.min(state.streak * 2, 20);
+    state.xp += xpGain;
+    fb.className = "feedback correct";
+    fb.innerHTML = `✓ CORRECT  (+${xpGain} XP)<br><br>${explain}`;
+    popXP(xpGain);
+  } else {
+    btn.classList.add("wrong");
+    state.wrong++;
+    state.streak = 0;
+    fb.className = "feedback wrong";
+    fb.innerHTML = `✗ WRONG — correct: <strong>${correct}</strong><br><br>${explain}`;
+  }
+
+  nextBtn.classList.add("visible");
+  updateHUD();
+  saveToFirebase();
+}
+
+function nextDrill() {
+  state.qIndex++;
+  renderDrill();
+}
+
+// ─── CATS ────────────────────────────────────────────────────────────────────
+
+document.querySelectorAll(".cat-pill").forEach(pill => {
+  pill.addEventListener("click", () => {
+    document.querySelectorAll(".cat-pill").forEach(p => p.classList.remove("active"));
+    pill.classList.add("active");
+    state.currentCat = pill.dataset.cat;
+    state.queue = getQueue(state.currentCat);
+    state.qIndex = 0;
+    renderDrill();
+  });
+});
+
+// ─── FIREBASE SAVE / LOAD ────────────────────────────────────────────────────
+
+function showSyncStatus(msg, color) {
+  let el = document.getElementById("syncStatus");
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = color || "var(--muted)";
+}
+
+async function saveToFirebase() {
+  if (!firebaseReady || !db) return;
+  try {
+    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    await setDoc(doc(db, "players", PLAYER_ID), {
+      xp:      state.xp,
+      streak:  state.streak,
+      correct: state.correct,
+      wrong:   state.wrong,
+      totalQ:  state.totalQ,
+      updatedAt: Date.now(),
+    });
+    showSyncStatus("✓ synced", "var(--green)");
+    setTimeout(() => showSyncStatus(""), 2000);
+  } catch(e) {
+    showSyncStatus("sync err", "#ff4444");
+    console.warn("Firebase save error:", e);
+  }
+}
+
+async function loadFromFirebase() {
+  if (!firebaseReady || !db) return false;
+  try {
+    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const snap = await getDoc(doc(db, "players", PLAYER_ID));
+    if (snap.exists()) {
+      const d = snap.data();
+      state.xp      = d.xp      || 0;
+      state.streak  = d.streak  || 0;
+      state.correct = d.correct || 0;
+      state.wrong   = d.wrong   || 0;
+      state.totalQ  = d.totalQ  || 0;
+      showSyncStatus("✓ loaded", "var(--green)");
+      setTimeout(() => showSyncStatus(""), 2000);
+      return true;
+    }
+  } catch(e) {
+    showSyncStatus("load err — offline?", "#ff8c00");
+    console.warn("Firebase load error:", e);
+  }
+  return false;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+async function init() {
+  state.queue = getQueue("all");
+
+  // Try to init Firebase
+  const configured = FIREBASE_CONFIG.apiKey !== "PASTE_YOUR_API_KEY_HERE";
+  if (configured) {
+    try {
+      const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+      const { getFirestore }  = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const app = initializeApp(FIREBASE_CONFIG);
+      db = getFirestore(app);
+      firebaseReady = true;
+      showSyncStatus("connecting…", "var(--accent2)");
+      await loadFromFirebase();
+    } catch(e) {
+      console.warn("Firebase init failed:", e);
+      showSyncStatus("Firebase error — check config", "#ff4444");
+    }
+  } else {
+    showSyncStatus("⚠ paste Firebase config to sync across devices", "var(--accent2)");
+  }
+
+  renderDrill();
+  updateHUD();
+}
+
+init();
+</script>
+</body>
+</html>
